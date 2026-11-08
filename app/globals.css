@@ -1,0 +1,334 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens — the only place colours, fonts and radii are defined.
+ * Forest greens for structure, sand/paper for surfaces, ochre as the single accent.
+ */
+@theme {
+  --color-forest: #1e3a2b;
+  --color-forest-deep: #132619;
+  --color-moss: #4f6b3f;
+  --color-sage: #b7c4a4;
+  --color-sage-soft: #e4e9d8;
+  --color-sand: #f3ece0;
+  --color-paper: #fbf8f2;
+  --color-ochre: #d39a3a;
+  --color-ochre-deep: #8a5a17;
+  --color-ink: #222a20;
+  --color-bark: #5a5246;
+  --color-line: #dcd3c2;
+
+  --font-serif: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-nunito), system-ui, sans-serif;
+
+  --radius-card: 1.25rem;
+  --radius-panel: 2.25rem;
+}
+
+/*
+ * Tone-aware colours (text-heading, text-muted, text-eyebrow, text-accent). They resolve per element,
+ * so a `.tone-dark` section (forest background) flips headings, body text, links and
+ * primary buttons to light variants; `.tone-light` resets them on light surfaces inside it.
+ */
+@theme inline {
+  --color-heading: var(--tone-heading);
+  --color-muted: var(--tone-muted);
+  --color-eyebrow: var(--tone-eyebrow);
+  --color-accent: var(--tone-accent);
+}
+
+@layer base {
+  :root,
+  .tone-light {
+    --tone-heading: var(--color-forest);
+    --tone-muted: var(--color-bark);
+    --tone-eyebrow: var(--color-moss);
+    --tone-accent: var(--color-ochre-deep);
+    --tone-btn-bg: var(--color-forest);
+    --tone-btn-fg: var(--color-paper);
+    --tone-btn-hover: var(--color-moss);
+    --tone-underline: var(--color-ochre);
+  }
+
+  .tone-light {
+    color: var(--color-ink);
+  }
+
+  .tone-dark {
+    --tone-heading: var(--color-paper);
+    --tone-muted: var(--color-sage-soft);
+    --tone-eyebrow: var(--color-ochre);
+    --tone-accent: var(--color-ochre);
+    --tone-btn-bg: var(--color-ochre);
+    --tone-btn-fg: var(--color-forest-deep);
+    --tone-btn-hover: #e2ac4f;
+    --tone-underline: var(--color-ochre);
+    color: var(--color-paper);
+  }
+
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--color-sand);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--heading-font, var(--font-serif));
+    font-variation-settings: "SOFT" 100;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-ochre);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: var(--color-sage);
+    color: var(--color-forest-deep);
+  }
+}
+
+@layer components {
+  .container-page {
+    width: 100%;
+    max-width: 76rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 768px) {
+    .container-page {
+      padding-inline: 2rem;
+    }
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 3rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 999px;
+    font-weight: 700;
+    line-height: 1.2;
+    transition: background-color 150ms, color 150ms, transform 150ms;
+  }
+  .btn:active {
+    transform: translateY(1px);
+  }
+  .btn-accent {
+    background: var(--color-ochre);
+    color: var(--color-forest-deep);
+  }
+  .btn-accent:hover {
+    background: #e2ac4f;
+  }
+  .btn-forest {
+    background: var(--color-forest);
+    color: var(--color-paper);
+  }
+  .btn-forest:hover {
+    background: var(--color-moss);
+  }
+  /* Main call to action: forest on light backgrounds, ochre on forest. */
+  .btn-primary {
+    background: var(--tone-btn-bg);
+    color: var(--tone-btn-fg);
+  }
+  .btn-primary:hover {
+    background: var(--tone-btn-hover);
+  }
+  .btn-ghost {
+    border: 1.5px solid currentColor;
+  }
+  .btn-ghost:hover {
+    background: color-mix(in srgb, currentColor 10%, transparent);
+  }
+
+  .link,
+  .prose-body a {
+    color: var(--tone-heading);
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-color: var(--tone-underline);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+  .link:hover,
+  .prose-body a:hover {
+    color: var(--tone-eyebrow);
+  }
+
+  /* Rich text (plain-text paragraphs and the CMS markdown subset). */
+  .prose-body > * + * {
+    margin-top: 1.1em;
+  }
+  .prose-body :is(h2, h3, h4) {
+    color: var(--tone-heading);
+    font-family: var(--heading-font, var(--font-serif));
+    line-height: 1.15;
+  }
+  .prose-body > :is(h2, h3, h4):not(:first-child) {
+    margin-top: 1.6em;
+  }
+  .prose-body h2 {
+    font-size: 1.875rem;
+  }
+  .prose-body h3 {
+    font-size: 1.5rem;
+  }
+  .prose-body h4 {
+    font-size: 1.25rem;
+  }
+  .prose-body ul {
+    list-style: disc;
+    padding-left: 1.25em;
+  }
+  .prose-body ol {
+    list-style: decimal;
+    padding-left: 1.4em;
+  }
+  .prose-body li + li {
+    margin-top: 0.35em;
+  }
+  .prose-body li::marker {
+    color: var(--color-ochre);
+  }
+  .prose-body strong {
+    font-weight: 700;
+    color: var(--tone-heading);
+  }
+
+  .field {
+    width: 100%;
+    border: 1.5px solid var(--color-line);
+    border-radius: 0.75rem;
+    background: var(--color-paper);
+    padding: 0.7rem 0.9rem;
+    color: var(--color-ink);
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--color-moss);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-sage) 70%, transparent);
+  }
+  .field[aria-invalid="true"] {
+    border-color: #b3412b;
+  }
+}
+
+/*
+ * Style system — block/header/footer `style` from the CMS (lib/style.ts sets the variables and
+ * classes on the block root). Unlayered on purpose: an explicit style beats the built-in utilities.
+ * Components mark their parts with block-title / block-text / block-eyebrow / block-actions / block-heading.
+ */
+:root {
+  /* Padding tokens are desktop values; phones get two thirds. */
+  --space-scale: 0.6667;
+}
+@media (min-width: 48rem) {
+  :root {
+    --space-scale: 1;
+  }
+}
+
+/* Ochre is a dark background (light text), but ochre buttons/eyebrows would vanish on it. */
+.tone-ochre {
+  --tone-eyebrow: var(--color-forest-deep);
+  --tone-accent: var(--color-forest-deep);
+  --tone-underline: var(--color-forest-deep);
+  --tone-btn-bg: var(--color-forest-deep);
+  --tone-btn-fg: var(--color-paper);
+  --tone-btn-hover: var(--color-forest);
+}
+
+.has-fg {
+  color: var(--block-fg);
+  --tone-heading: var(--block-fg);
+  --tone-muted: var(--block-fg);
+}
+
+.has-accent {
+  --tone-accent: var(--block-accent);
+  --tone-eyebrow: var(--block-accent);
+  --tone-underline: var(--block-accent);
+  --tone-btn-bg: var(--block-accent);
+  --tone-btn-fg: var(--block-accent-fg);
+  --tone-btn-hover: color-mix(in srgb, var(--block-accent) 85%, var(--block-accent-fg));
+}
+
+.has-body-font {
+  font-family: var(--body-font);
+}
+
+.has-heading-size .block-title {
+  font-size: var(--heading-size);
+}
+
+.has-text-size .block-text {
+  font-size: var(--text-size);
+}
+
+.has-align {
+  text-align: var(--align);
+}
+.has-align :is(.block-title, .block-text, .block-eyebrow) {
+  text-align: var(--align);
+  margin-inline: var(--align-margin);
+}
+.has-align .block-actions {
+  justify-content: var(--align-justify);
+}
+.has-align .block-heading {
+  flex-direction: column;
+  align-items: var(--align-justify);
+}
+
+.has-width > .container-page {
+  max-width: var(--block-width);
+}
+
+.pad-t {
+  padding-top: calc(var(--block-pt) * var(--space-scale));
+}
+.pad-b {
+  padding-bottom: calc(var(--block-pb) * var(--space-scale));
+}
+
+@media (max-width: 47.99rem) {
+  .hide-mobile {
+    display: none;
+  }
+}
+@media (min-width: 48rem) {
+  .hide-desktop {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
