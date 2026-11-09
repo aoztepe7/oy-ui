@@ -36,6 +36,29 @@ export function formatPrice(price: number, period: PricePeriod): string {
   return period === "Monthly" ? `${amount} / ay` : amount;
 }
 
+/** 3000 → "₺3.000" (no period). */
+export function formatAmount(price: number): string {
+  return currency.format(price);
+}
+
+/** Price table packages (not add-ons) of a program; empty when it has a single price. */
+export function pricePackages(p: Pick<ProgramSummary, "priceOptions">) {
+  return (p.priceOptions ?? []).filter((o) => !o.isAddon);
+}
+
+/**
+ * Headline price: the single price, or the cheapest package of a price table
+ * ({ amount: "₺20.000", from: true } → "₺20.000'den başlayan").
+ */
+export function headlinePrice(p: Pick<ProgramSummary, "price" | "pricePeriod" | "priceOptions">): { amount: string; from: boolean } {
+  const packages = pricePackages(p);
+  if (packages.length === 0) return { amount: formatPrice(p.price, p.pricePeriod), from: false };
+  const min = Math.min(...packages.map((o) => o.price));
+  // A single package with add-ons still varies with the number of people.
+  const varies = packages.length > 1 || (p.priceOptions ?? []).some((o) => o.isAddon);
+  return { amount: formatPrice(min, p.pricePeriod), from: varies };
+}
+
 function parseDate(iso: string): Date {
   // Treat YYYY-MM-DD as a calendar date (no timezone shift).
   return new Date(`${iso}T12:00:00Z`);

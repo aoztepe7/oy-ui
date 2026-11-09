@@ -5,21 +5,24 @@ import { MobileNav } from "./MobileNav";
 import { NavLinks } from "./NavLinks";
 import { SmartLink } from "./SmartLink";
 
-/** Site header; `site.headerStyle` restyles it. `preview` marks it as a selectable region for the visual editor. */
+/**
+ * Sticky, frosted-glass site header; `site.headerStyle` restyles it.
+ * `preview` marks it as a selectable region for the visual editor (not sticky there).
+ */
 export function Header({ site, preview = false }: { site: SiteSettings; preview?: boolean }) {
   const cta = site.headerCtaText && site.headerCtaHref ? { text: site.headerCtaText, href: site.headerCtaHref } : null;
-  const s = resolveStyle(site.headerStyle, { band: true, background: { className: "bg-sand/95", dark: false } });
+  const s = resolveStyle(site.headerStyle, { band: true, background: { className: "bg-sand/80 backdrop-blur-xl backdrop-saturate-150", dark: false } });
   const padding = paddingClasses(site.headerStyle, { top: "", bottom: "" });
   return (
     <header
       data-region={preview ? "header" : undefined}
-      className={cx("relative z-30 border-b border-line/70", s.className)}
+      className={cx("z-40 border-b border-line/60", preview ? "relative" : "sticky top-0", s.className)}
       style={s.style}
     >
       <a href="#icerik" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-forest focus:px-4 focus:py-2 focus:text-paper">
         İçeriğe geç
       </a>
-      <div className={cx("container-page flex items-center justify-between gap-6", padding ? `min-h-18 ${padding}` : "h-18")}>
+      <div className={cx("container-page flex items-center justify-between gap-6", padding ? `min-h-20 ${padding}` : "h-20")}>
         <Logo name={site.siteName} />
         {site.headerNav.length > 0 && (
           <nav aria-label="Ana menü" className="hidden lg:block">

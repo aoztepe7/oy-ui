@@ -15,20 +15,23 @@ function typesOf(filter: ProgramTypeFilter): ProgramType[] {
   return ALL_TYPES.includes(filter) ? [filter] : ALL_TYPES;
 }
 
-/** Filter by type, optionally put featured programs first (in their set order), then by start date; apply the limit. */
+/**
+ * Filter by type, then by start date; apply the limit. With `featuredFirst`, the showcase (vitrin) programs come
+ * first in their set order and are shown whatever their type — featuring a program in the panel is an explicit
+ * choice that must not be hidden by the block's type filter (e.g. a weekly class in the "events" home slider).
+ */
 export function selectPrograms(
   programs: ProgramSummary[],
   opts: { types: ProgramType[]; featuredFirst: boolean; limit: number },
 ): ProgramSummary[] {
-  const byDate = programs
-    .filter((p) => opts.types.includes(p.type))
-    .sort((a, b) => a.startDate.localeCompare(b.startDate));
+  const byDate = [...programs].sort((a, b) => a.startDate.localeCompare(b.startDate));
+  const ofType = byDate.filter((p) => opts.types.includes(p.type));
   const ordered = opts.featuredFirst
     ? [
         ...byDate.filter((p) => p.featuredOrder != null).sort((a, b) => a.featuredOrder! - b.featuredOrder!),
-        ...byDate.filter((p) => p.featuredOrder == null),
+        ...ofType.filter((p) => p.featuredOrder == null),
       ]
-    : byDate;
+    : ofType;
   const limit = Number(opts.limit) || 0;
   return limit > 0 ? ordered.slice(0, limit) : ordered;
 }
@@ -46,7 +49,7 @@ export async function ProgramsBlock({ props: p, style, primary, edit }: BlockCom
     list = (
       <ProgramFilters
         items={programs.map(({ type, ageMin, ageMax }) => ({ type, ageMin, ageMax }))}
-        types={types}
+        types={ALL_TYPES.filter((t) => types.includes(t) || programs.some((x) => x.type === t))}
         layout={p.layout}
         label={label}
       >

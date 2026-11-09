@@ -45,32 +45,71 @@ function fromResult(result: PostResult, success: string, values: Record<string, 
 }
 
 export async function submitEnrollment(_prev: FormState, form: FormData): Promise<FormState> {
-  const success = "Ön kaydınız alındı. Ekibimiz en kısa sürede sizi arayacak.";
-  if (isBot(form)) return { status: "success", message: success };
+  const successOne = "Ön kaydınız alındı. Ekibimiz en kısa sürede sizi arayacak.";
+  if (isBot(form)) return { status: "success", message: successOne };
 
-  const data = {
-    programId: field(form, "programId"),
-    childName: field(form, "childName"),
-    childBirthDate: field(form, "childBirthDate"),
-    parentName: field(form, "parentName"),
-    parentPhone: field(form, "parentPhone"),
-    parentEmail: field(form, "parentEmail"),
-    note: field(form, "note"),
-  };
+  // The form is built from the program's definition (panel). Field names:
+  //   childName_0 / childBirthDate_0 …  (count in childCount, 1–6)
+  //   q.{questionId}                    family-level question
+  //   q.{questionId}.{childIndex}       per-child question
+  // Which fields are required is decided by the API from the same definition.
+  const childCount = Math.min(6, Math.max(1, Number(field(form, "childCount")) || 1));
+  const data: Record<string, string> = { childCount: String(childCount) };
+  for (const [key, value] of form.entries()) if (typeof value === "string" && key !== "website") data[key] = value.trim();
 
+  const familyAnswers: Record<string, string> = {};
+  const childAnswers: Record<string, string>[] = Array.from({ length: childCount }, () => ({}));
+  for (const [key, value] of Object.entries(data)) {
+    const m = /^q\.([A-Za-z0-9_-]+)(?:\.(\d))?$/.exec(key);
+    if (!m) continue;
+    if (m[2] === undefined) familyAnswers[m[1]] = value;
+    else if (Number(m[2]) < childCount) childAnswers[Number(m[2])][m[1]] = value;
+  }
+  const children = childAnswers.map((answers, i) => ({
+    name: data[`childName_${i}`] ?? "",
+    birthDate: data[`childBirthDate_${i}`] || null,
+    answers,
+  }));
+
+  // Quick checks that hold for every form; the rest comes back from the API.
   const errors: Record<string, string> = {};
   if (!data.programId) errors.programId = "Program seçilmedi.";
-  if (data.childName.length < 2) errors.childName = "Çocuğun adını yazın.";
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(data.childBirthDate) || data.childBirthDate > new Date().toISOString().slice(0, 10)) {
-    errors.childBirthDate = "Geçerli bir doğum tarihi seçin.";
-  }
-  if (data.parentName.length < 2) errors.parentName = "Adınızı yazın.";
-  if (!PHONE_RE.test(data.parentPhone)) errors.parentPhone = "Geçerli bir telefon numarası yazın.";
-  if (!EMAIL_RE.test(data.parentEmail)) errors.parentEmail = "Geçerli bir e-posta adresi yazın.";
-  if (data.note.length > 1000) errors.note = "Not en fazla 1000 karakter olabilir.";
+  if (data.hasPackages && !data.priceOption) errors.priceOption = "Katılım seçeneğini seçin.";
+  children.forEach((c, i) => {
+    if (c.name.length < 2) errors[`childName_${i}`] = "Çocuğun adını yazın.";
+  });
+  if ((data.parentName ?? "").length < 2) errors.parentName = "Adınızı yazın.";
+  if (data.parentPhone && !PHONE_RE.test(data.parentPhone)) errors.parentPhone = "Geçerli bir telefon numarası yazın.";
+  if (data.parentEmail && !EMAIL_RE.test(data.parentEmail)) errors.parentEmail = "Geçerli bir e-posta adresi yazın.";
+  if ((data.note ?? "").length > 1000) errors.note = "Not en fazla 1000 karakter olabilir.";
   if (Object.keys(errors).length) return invalid(errors, data);
 
-  return fromResult(await createEnrollment(data), success, data);
+  const request = {
+    programId: data.programId,
+    children,
+    parentName: data.parentName ?? "",
+    parentPhone: data.parentPhone ?? "",
+    parentEmail: data.parentEmail ?? "",
+    note: data.note ?? "",
+    priceOption: data.priceOption || null,
+    answers: familyAnswers,
+  };
+  const success = childCount > 1 ? `${childCount} çocuk için ön kaydınız alındı. Ekibimiz en kısa sürede sizi arayacak.` : successOne;
+  const result = fromResult(await createEnrollment(request), success, data);
+  // API error keys → form field names.
+  if (result.errors) {
+    result.errors = Object.fromEntries(
+      Object.entries(result.errors).map(([key, message]) => [
+        key
+          .replace(/^children\[(\d+)\]\.name$/, "childName_$1")
+          .replace(/^children\[(\d+)\]\.birthDate$/, "childBirthDate_$1")
+          .replace(/^children\[(\d+)\]\.answers\.(.+)$/, "q.$2.$1")
+          .replace(/^answers\.(.+)$/, "q.$1"),
+        message,
+      ]),
+    );
+  }
+  return result;
 }
 
 export async function submitContact(_prev: FormState, form: FormData): Promise<FormState> {

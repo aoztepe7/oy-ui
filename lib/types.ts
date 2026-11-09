@@ -157,17 +157,57 @@ export interface ProgramSummary {
   endTime: string;
   capacity: number;
   enrolledCount: number;
+  /** With a price table: the cheapest package. */
   price: number;
   pricePeriod: PricePeriod;
+  /** Optional price table (packages + add-ons), e.g. "2 Yetişkin + 1 Çocuk: 24.000". */
+  priceOptions?: PriceOption[];
   summary: string;
   coverImageUrl: string;
   location: string;
   /** Position among featured programs (1 = first); null when not featured. */
   featuredOrder: number | null;
+  /** false: no pre-registration form on the site (contact box instead). Missing = true (older API). */
+  enrollmentEnabled?: boolean;
+}
+
+export type FieldMode = "Hidden" | "Optional" | "Required";
+export type QuestionType = "Text" | "Textarea" | "Select" | "Radio" | "Checkbox" | "Date" | "Number" | "YesNo";
+
+export interface FormQuestion {
+  id: string;
+  label: string;
+  type: QuestionType;
+  required: boolean;
+  /** Asked once per child instead of once per family. */
+  perChild: boolean;
+  options: string[];
+  hint: string;
+}
+
+/** Pre-registration form of a program (set in the panel). Child and parent names are always asked. */
+export interface EnrollmentFormConfig {
+  intro: string;
+  childBirthDate: FieldMode;
+  parentPhone: FieldMode;
+  parentEmail: FieldMode;
+  note: FieldMode;
+  allowSiblings: boolean;
+  questions: FormQuestion[];
+}
+
+export interface PriceOption {
+  label: string;
+  price: number;
+  note: string;
+  /** Extra on top of a package ("+3.000"). */
+  isAddon: boolean;
 }
 
 export interface ProgramDetail extends ProgramSummary {
   description: string;
+  /** Missing on older APIs → the original fixed form. */
+  enrollmentForm?: EnrollmentFormConfig | null;
 }
 
 export interface Theme {
@@ -188,14 +228,18 @@ export interface TeamMember {
   photoUrl: string;
 }
 
+/** One family's pre-registration; each child becomes its own enrollment. */
 export interface EnrollmentRequest {
   programId: string;
-  childName: string;
-  childBirthDate: string;
+  children: { name: string; birthDate: string | null; answers: Record<string, string> }[];
   parentName: string;
   parentPhone: string;
   parentEmail: string;
   note: string;
+  /** Chosen price table package label (camps with packages). */
+  priceOption: string | null;
+  /** Family-level custom question answers: question id → value. */
+  answers: Record<string, string>;
 }
 
 export interface ContactRequest {

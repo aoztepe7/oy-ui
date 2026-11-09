@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { readFrame } from "@/lib/imageFrame";
 import { Contours } from "./Contours";
 
 type Illustration = "leaf" | "tree" | "mountain";
@@ -6,6 +7,7 @@ type Illustration = "leaf" | "tree" | "mountain";
 /**
  * Fills its (relatively positioned) parent with the image, or with a drawn
  * nature placeholder when the CMS left the image empty.
+ * Framing chosen in the panel (focal point / show whole image) comes with the URL, see lib/imageFrame.
  */
 export function MediaImage({
   src,
@@ -23,13 +25,32 @@ export function MediaImage({
   className?: string;
 }) {
   if (src) {
+    const frame = readFrame(src);
+    const position = { objectPosition: `${frame.x}% ${frame.y}%` };
+    if (frame.fit === "contain") {
+      // Whole image, letterboxed over a soft blurred copy of itself instead of empty bars.
+      return (
+        <>
+          <Image
+            src={frame.src}
+            alt=""
+            aria-hidden="true"
+            fill
+            sizes="10vw"
+            className="scale-110 object-cover opacity-70 blur-2xl saturate-125"
+          />
+          <Image src={frame.src} alt={alt} fill sizes={sizes} priority={priority} className={`object-contain ${className}`} />
+        </>
+      );
+    }
     return (
       <Image
-        src={src}
+        src={frame.src}
         alt={alt}
         fill
         sizes={sizes}
         priority={priority}
+        style={position}
         className={`object-cover ${className}`}
       />
     );

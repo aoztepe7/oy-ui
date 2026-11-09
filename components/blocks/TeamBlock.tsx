@@ -14,32 +14,32 @@ export async function TeamBlock({ props: p, style, primary, edit }: BlockCompone
     if (team.length === 0) return null;
     return (
       <Section style={style} anchor={p.anchor}>
-        <div className="grid items-center gap-10 md:grid-cols-[1fr_1.2fr]">
+        <div className="grid items-center gap-14 md:grid-cols-[1fr_1.25fr]">
           <div>
             {p.title && (
-              <Heading className="block-title text-4xl text-heading md:text-5xl" {...edit.text("title")}>
+              <Heading className="block-title text-[clamp(2.3rem,4.6vw,3.9rem)] text-heading" {...edit.text("title")}>
                 {p.title}
               </Heading>
             )}
             {p.intro && (
-              <p className="block-text mt-4 max-w-md whitespace-pre-line text-lg text-muted" {...edit.textarea("intro")}>
+              <p className="block-text mt-5 max-w-md whitespace-pre-line text-lg leading-relaxed text-muted" {...edit.textarea("intro")}>
                 {p.intro}
               </p>
             )}
             {p.linkText && p.linkHref && (
-              <SmartLink href={p.linkHref} className="link mt-6 inline-block" {...edit.text("linkText")}>
+              <SmartLink href={p.linkHref} className="link mt-8" {...edit.text("linkText")}>
                 {p.linkText}
               </SmartLink>
             )}
           </div>
-          <ul className="flex flex-wrap gap-6">
-            {team.map((m) => (
-              <li key={m.id} className="w-36">
-                <div className="relative aspect-square overflow-hidden rounded-full ring-4 ring-paper">
-                  <MediaImage src={m.photoUrl} alt={m.photoUrl ? m.fullName : ""} sizes="9rem" illustration="leaf" />
+          <ul className="reveal-children flex flex-wrap justify-center gap-8 md:justify-start">
+            {team.map((m, i) => (
+              <li key={m.id} className={`group w-44 text-center md:w-52 ${i % 2 ? "md:mt-16" : ""}`}>
+                <div className="zoom-img relative aspect-[4/5] overflow-hidden rounded-t-full rounded-b-[2rem] shadow-(--shadow-lift) ring-[6px] ring-paper">
+                  <MediaImage src={m.photoUrl} alt={m.photoUrl ? m.fullName : ""} sizes="13rem" illustration="leaf" />
                 </div>
-                <p className="mt-3 font-serif text-lg leading-tight text-heading">{m.fullName}</p>
-                <p className="text-sm text-muted">{m.title}</p>
+                <p className="mt-5 font-serif text-2xl leading-tight text-heading">{m.fullName}</p>
+                <p className="mt-1 text-sm font-bold text-eyebrow">{m.title}</p>
               </li>
             ))}
           </ul>
