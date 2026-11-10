@@ -33,7 +33,7 @@ function fromResult(result: PostResult, success: string, values: Record<string, 
   }
   const messages: Record<number, string> = {
     429: "Çok fazla deneme yapıldı. Lütfen birkaç dakika sonra tekrar deneyin.",
-    409: "Bu programın kontenjanı dolu. Bizimle iletişime geçebilirsiniz.",
+    409: "Ön kaydınız şu anda alınamadı. Lütfen bizimle iletişime geçin.",
   };
   return {
     status: "error",

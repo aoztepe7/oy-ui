@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { formatAge, formatDateRange, formatSchedule, headlinePrice, programTypeLabels, remainingSeats } from "@/lib/format";
+import { formatAge, formatDateRange, formatSchedule, headlinePrice, programTypeLabels } from "@/lib/format";
 import type { ProgramSummary } from "@/lib/types";
 import { MediaImage } from "./MediaImage";
-import { SeatsNote } from "./SeatsNote";
 
 const illustrationByType = { WeeklyClass: "tree", Camp: "mountain", Event: "leaf", Workshop: "leaf" } as const;
 
@@ -86,7 +85,6 @@ export function ProgramCard({ program, headingLevel = "h3" }: { program: Program
         <div className="mt-auto flex items-end justify-between gap-4 border-t border-line/70 pt-6">
           <div>
             <PriceLine program={program} />
-            <SeatsNote remaining={remainingSeats(program)} />
           </div>
           <span
             aria-hidden="true"

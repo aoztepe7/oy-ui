@@ -6,7 +6,6 @@ import { EnrollmentForm } from "@/components/EnrollmentForm";
 import { JsonLd } from "@/components/JsonLd";
 import { MediaImage } from "@/components/MediaImage";
 import { Markdown } from "@/components/Markdown";
-import { SeatsNote } from "@/components/SeatsNote";
 import { getProgram, getPrograms, getSite } from "@/lib/api";
 import {
   formatAge,
@@ -16,7 +15,6 @@ import {
   headlinePrice,
   pricePackages,
   programTypeLabels,
-  remainingSeats,
 } from "@/lib/format";
 import { SITE_URL, pageMetadata } from "@/lib/site";
 import type { ProgramDetail, SiteSettings } from "@/lib/types";
@@ -140,7 +138,6 @@ function structuredData(p: ProgramDetail, site: SiteSettings) {
         }
       : { "@type": "Offer", price: p.price }),
     priceCurrency: "TRY",
-    availability: remainingSeats(p) > 0 ? "https://schema.org/InStock" : "https://schema.org/SoldOut",
     url,
   };
   const image = p.coverImageUrl ? [p.coverImageUrl] : undefined;
@@ -189,7 +186,6 @@ export default async function ProgramPage({ params }: PageProps<"/programlar/[sl
   const [program, site] = await Promise.all([getProgram(slug), getSite()]);
   if (!program) notFound();
 
-  const remaining = remainingSeats(program);
   const isWeekly = program.type === "WeeklyClass";
   const listHref = isWeekly ? "/programlar" : "/etkinlikler";
 
@@ -272,12 +268,6 @@ export default async function ProgramPage({ params }: PageProps<"/programlar/[sl
                 {headline.from && <span className="font-normal text-bark">’den başlayan</span>}
               </dd>
             </div>
-            <div className="flex items-center rounded-2xl bg-sage-soft/70 px-5 py-4">
-              <dt className="sr-only">Boş yer</dt>
-              <dd>
-                <SeatsNote remaining={remaining} />
-              </dd>
-            </div>
           </dl>
 
           {packages.length > 0 && <PriceTable program={program} />}
@@ -299,9 +289,6 @@ export default async function ProgramPage({ params }: PageProps<"/programlar/[sl
                 {headline.from && <span className="ml-1.5 font-sans text-base font-bold text-sage-soft">’den başlayan</span>}
               </p>
               <p className="mt-3 text-sage-soft">Formu doldurun, ekibimiz sizi arayıp ayrıntıları konuşsun.</p>
-              <div className="mt-5 rounded-2xl bg-paper px-4 py-3">
-                <SeatsNote remaining={remaining} />
-              </div>
               <a href="#on-kayit" className="btn btn-primary mt-6 w-full">
                 Ön kayıt formuna git
               </a>
@@ -334,7 +321,6 @@ export default async function ProgramPage({ params }: PageProps<"/programlar/[sl
               <EnrollmentForm
                 programId={program.id}
                 programTitle={program.title}
-                full={remaining === 0}
                 packages={packages.map((o) => ({ label: o.label, price: formatAmount(o.price) }))}
                 config={program.enrollmentForm ?? undefined}
               />

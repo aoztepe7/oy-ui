@@ -159,13 +159,11 @@ function Question({ q, name, value, error }: { q: FormQuestion; name: string; va
 export function EnrollmentForm({
   programId,
   programTitle,
-  full,
   packages = [],
   config = DEFAULT_FORM,
 }: {
   programId: string;
   programTitle: string;
-  full: boolean;
   packages?: EnrollmentPackage[];
   config?: EnrollmentFormConfig;
 }) {
@@ -195,15 +193,10 @@ export function EnrollmentForm({
       <input type="hidden" name="childCount" value={count} />
       <Honeypot />
 
-      {(config.intro || full) && (
+      {config.intro && (
         <div className="mb-8 grid gap-3 md:grid-cols-2">
           {config.intro && (
             <p className="whitespace-pre-line rounded-2xl bg-sage-soft/60 px-5 py-4 text-[0.95rem] text-forest md:col-span-full">{config.intro}</p>
-          )}
-          {full && (
-            <p className="rounded-2xl bg-sand px-5 py-4 text-[0.95rem] text-bark md:col-span-full">
-              Bu programın kontenjanı dolu. Formu doldurursanız yer açıldığında sizi arayalım.
-            </p>
           )}
         </div>
       )}

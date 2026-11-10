@@ -90,10 +90,6 @@ export const programTypeLabels: Record<ProgramType, string> = {
   Workshop: "Atölye",
 };
 
-export function remainingSeats(p: Pick<ProgramSummary, "capacity" | "enrolledCount">): number {
-  return Math.max(0, p.capacity - p.enrolledCount);
-}
-
 /** Today's date as YYYY-MM-DD in Istanbul time. */
 export function todayIso(): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Istanbul" }).format(new Date());
