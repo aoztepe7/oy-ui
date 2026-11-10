@@ -13,9 +13,6 @@ ARG NEXT_PUBLIC_MEDIA_HOST=""
 # Used in canonical/OpenGraph URLs of pages prerendered at build time.
 ARG SITE_URL=https://okulumyeryuzu.com
 ENV SITE_URL=$SITE_URL
-# Panel origins allowed to frame /onizleme (frame-ancestors header is baked into the build).
-ARG PANEL_ORIGINS=""
-ENV PANEL_ORIGINS=$PANEL_ORIGINS
 ENV NEXT_PUBLIC_MEDIA_HOST=$NEXT_PUBLIC_MEDIA_HOST
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .

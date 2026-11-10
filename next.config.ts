@@ -1,6 +1,5 @@
 import type { NextConfig } from "next";
 import type { RemotePattern } from "next/dist/shared/lib/image-config";
-import { panelOrigins } from "./lib/panel";
 
 /** Image hosts: the API media host(s) plus anything in NEXT_PUBLIC_MEDIA_HOST (comma-separated URLs or hosts). */
 function mediaPatterns(): RemotePattern[] {
@@ -29,7 +28,8 @@ function mediaPatterns(): RemotePattern[] {
 const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
-  // Only the visual editor preview may be framed, and only by the panel (PANEL_ORIGINS, read at build time).
+  // No page may be framed except the visual editor preview, whose frame-ancestors header is set
+  // per request from PANEL_ORIGINS (runtime) in proxy.ts.
   async headers() {
     return [
       {
@@ -38,10 +38,6 @@ const nextConfig: NextConfig = {
           { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
         ],
-      },
-      {
-        source: "/onizleme/:path*",
-        headers: [{ key: "Content-Security-Policy", value: ["frame-ancestors 'self'", ...panelOrigins()].join(" ") }],
       },
     ];
   },

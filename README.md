@@ -24,7 +24,7 @@ API (oy-service) çalışmıyorsa site yine açılır: tüm veri istekleri hata 
 | `REVALIDATE_SECRET` | Revalidation webhook'u için ortak anahtar | — (boşsa webhook 401 döner) |
 | `SITE_URL` | Canonical, sitemap ve OpenGraph adresleri | `https://okulumyeryuzu.com` |
 | `NEXT_PUBLIC_MEDIA_HOST` | Ek görsel host'ları, virgülle ayrılmış (build sırasında okunur) | — |
-| `PANEL_ORIGINS` | `/onizleme` önizlemesini iframe içinde açabilen panel adresleri, virgülle ayrılmış. `frame-ancestors` başlığı build sırasında, postMessage kontrolü çalışma anında okunur | `http://localhost:3001,http://localhost:5173` |
+| `PANEL_ORIGINS` | `/onizleme` önizlemesini iframe içinde açabilen panel adresleri, virgülle ayrılmış. `frame-ancestors` başlığı (`proxy.ts`) ve postMessage kontrolü çalışma anında okunur | `http://localhost:3001,http://localhost:5173` |
 
 `localhost:8080` ve `service.okulumyeryuzu.com` görsel host'ları her zaman izinlidir.
 
