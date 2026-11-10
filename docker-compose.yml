@@ -1,0 +1,21 @@
+services:
+  oy-ui:
+    image: ${RUNARTECH_IMAGE}
+    restart: unless-stopped
+    environment:
+      API_URL: ${API_URL:?set API_URL}
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET:?set REVALIDATE_SECRET}
+      SITE_URL: ${SITE_URL:-https://okulumyeryuzu.com}
+      PANEL_ORIGINS: ${PANEL_ORIGINS:-}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - web
+
+networks:
+  web:
+    external: true
