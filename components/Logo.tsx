@@ -9,12 +9,7 @@ export function Logo({ name, size = "md" }: { name: string; size?: "md" | "lg" }
       <span className={`relative shrink-0 transition-transform duration-700 ease-(--ease-out-soft) group-hover:rotate-[-8deg] ${mark}`}>
         <Image src="/logo-wreath.png" alt="" fill sizes="96px" className="object-contain" priority />
       </span>
-      <span className="font-serif text-[1.35rem] font-semibold leading-none tracking-tight">
-        {name}
-        <span className="mt-1 block font-sans text-[0.62rem] font-extrabold uppercase tracking-[0.28em] text-eyebrow">
-          Orman Okulu
-        </span>
-      </span>
+      <span className="font-serif text-[1.35rem] font-semibold leading-none tracking-tight">{name}</span>
     </Link>
   );
 }

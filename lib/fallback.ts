@@ -108,14 +108,14 @@ const programsBlock = (programType: "all" | "events", showFilters: boolean, empt
 const fallbackPages: Record<string, Omit<Page, "slug" | "path" | "publishedAt">> = {
   home: {
     title: "Ana Sayfa",
-    seoTitle: "Okulum Yeryüzü — Çocuklar için orman okulu",
-    seoDescription: "3-10 yaş çocuklar için haftalık orman okulu grupları, doğa kampları ve aile buluşmaları.",
+    seoTitle: "Okulum Yeryüzü — Çocuklar için orman buluşması",
+    seoDescription: "3-10 yaş çocuklar için haftalık orman buluşması grupları, doğa kampları ve aile buluşmaları.",
     blocks: [
       block("hero", {
         eyebrow: "",
         title: "Sınıfımız orman, öğretmenimiz yeryüzü",
         subtitle:
-          "3-10 yaş arası çocuklar için haftalık orman okulu grupları, kamplar ve aile buluşmaları. Her mevsim, her havada dışarıdayız.",
+          "3-10 yaş arası çocuklar için haftalık orman buluşması grupları, kamplar ve aile buluşmaları. Her mevsim, her havada dışarıdayız.",
         image: "",
         primaryText: "Programları incele",
         primaryHref: "/programlar",
@@ -200,9 +200,9 @@ const fallbackPages: Record<string, Omit<Page, "slug" | "path" | "publishedAt">>
   programlar: {
     title: "Programlar",
     seoTitle: "Programlar",
-    seoDescription: "Orman okulu grupları, kamplar, etkinlikler ve atölyeler.",
+    seoDescription: "Orman buluşması grupları, kamplar, etkinlikler ve atölyeler.",
     blocks: [
-      header("Programlar", "Haftalık orman okulu gruplarımız, kamplarımız ve atölyelerimiz. Yaşa ve türe göre filtreleyin."),
+      header("Programlar", "Haftalık orman buluşması gruplarımız, kamplarımız ve atölyelerimiz. Yaşa ve türe göre filtreleyin."),
       programsBlock("all", true, "Yeni programlarımız çok yakında burada olacak."),
     ],
   },
@@ -253,8 +253,8 @@ export function fallbackPrograms(): ProgramDetail[] {
   return [
     {
       id: "00000000-0000-0000-0000-000000000001",
-      slug: "3-4-yas-orman-okulu",
-      title: "3-4 Yaş Orman Okulu",
+      slug: "3-4-yas-orman-bulusmasi",
+      title: "3-4 Yaş Orman Buluşması",
       type: "WeeklyClass",
       ageMin: 3,
       ageMax: 4,
@@ -275,8 +275,8 @@ export function fallbackPrograms(): ProgramDetail[] {
     },
     {
       id: "00000000-0000-0000-0000-000000000002",
-      slug: "5-6-yas-orman-okulu",
-      title: "5-6 Yaş Orman Okulu",
+      slug: "5-6-yas-orman-bulusmasi",
+      title: "5-6 Yaş Orman Buluşması",
       type: "WeeklyClass",
       ageMin: 5,
       ageMax: 6,
@@ -381,7 +381,7 @@ export function fallbackTeam(): TeamMember[] {
     {
       id: "00000000-0000-0000-0000-000000000022",
       fullName: "Mehmet Demir",
-      title: "Orman Okulu Öğretmeni",
+      title: "Orman Buluşması Öğretmeni",
       bio: "Hayatta kalma becerileri ve iz sürme konusunda uzman. Consectetur adipiscing elit.",
       photoUrl: "",
     },

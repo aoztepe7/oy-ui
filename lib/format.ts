@@ -84,7 +84,7 @@ export function formatAge(min: number, max: number): string {
 }
 
 export const programTypeLabels: Record<ProgramType, string> = {
-  WeeklyClass: "Orman okulu",
+  WeeklyClass: "Orman buluşması",
   Camp: "Kamp",
   Event: "Etkinlik",
   Workshop: "Atölye",

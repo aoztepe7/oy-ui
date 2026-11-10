@@ -8,11 +8,13 @@ import { ProgramSlider } from "./ProgramSlider";
 
 /** URL-friendly Turkish filter values (`?tur=…&yas=…`) ↔ API ProgramType. */
 const TYPE_PARAMS: Record<ProgramType, { value: string; label: string }> = {
-  WeeklyClass: { value: "orman-okulu", label: "Orman okulu" },
+  WeeklyClass: { value: "orman-bulusmasi", label: "Orman buluşması" },
   Camp: { value: "kamp", label: "Kamplar" },
   Event: { value: "etkinlik", label: "Etkinlikler" },
   Workshop: { value: "atolye", label: "Atölyeler" },
 };
+/** Old filter values still found in shared links. */
+const LEGACY_TYPE_PARAMS: Record<string, ProgramType> = { "orman-okulu": "WeeklyClass" };
 const AGES = [3, 4, 5, 6, 7, 8, 9, 10];
 const CHANGE_EVENT = "oy:filters";
 
@@ -63,7 +65,8 @@ export function ProgramFilters({
   const ageId = useId();
   const search = useSyncExternalStore(subscribe, () => window.location.search, () => "");
   const params = new URLSearchParams(search);
-  const type = types.find((t) => TYPE_PARAMS[t].value === params.get("tur"));
+  const typeParam = params.get("tur") ?? "";
+  const type = types.find((t) => TYPE_PARAMS[t].value === typeParam || LEGACY_TYPE_PARAMS[typeParam] === t);
   const ageParam = Number.parseInt(params.get("yas") ?? "", 10);
   const age = AGES.includes(ageParam) ? ageParam : undefined;
 
