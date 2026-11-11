@@ -2,8 +2,9 @@
 
 import { useActionState, useState } from "react";
 import { submitEnrollment } from "@/lib/actions";
-import type { EnrollmentFormConfig, FieldMode, FormQuestion } from "@/lib/types";
-import { birthYears, DateField, eventYears } from "./DateField";
+import type { EnrollmentFormConfig, FieldMode } from "@/lib/types";
+import { birthYears, DateField } from "./DateField";
+import { conditionValue, QuestionGroup, type AnswerValues } from "./FormQuestions";
 import { Field, FormMessage, Honeypot, initialFormState } from "./FormParts";
 
 export interface EnrollmentPackage {
@@ -35,123 +36,6 @@ function childrenIn(label: string): number | null {
 
 const shown = (mode: FieldMode) => mode !== "Hidden";
 
-/** One custom question from the panel. `name` is q.{id} (family) or q.{id}.{child}. */
-function Question({ q, name, value, error }: { q: FormQuestion; name: string; value?: string; error?: string }) {
-  const id = `f-${name}`;
-  const describedBy = error ? `${id}-error` : q.hint ? `${id}-hint` : undefined;
-  const optional = !q.required && <span className="font-normal text-bark"> (isteğe bağlı)</span>;
-  const hint = q.hint && !error && (
-    <p id={`${id}-hint`} className="mt-1 text-sm text-bark">
-      {q.hint}
-    </p>
-  );
-  const err = error && (
-    <p id={`${id}-error`} className={ERROR}>
-      {error}
-    </p>
-  );
-
-  if (q.type === "Checkbox") {
-    return (
-      <div>
-        <label className="flex cursor-pointer items-start gap-3 text-[0.95rem] text-ink">
-          <input
-            type="checkbox"
-            id={id}
-            name={name}
-            value="true"
-            defaultChecked={value === "true" || value === "on"}
-            required={q.required}
-            aria-invalid={error ? true : undefined}
-            aria-describedby={describedBy}
-            className="mt-1 h-4 w-4 accent-forest"
-          />
-          <span>
-            {q.label}
-            {optional}
-          </span>
-        </label>
-        {hint}
-        {err}
-      </div>
-    );
-  }
-
-  if (q.type === "Radio" || q.type === "YesNo") {
-    const options = q.type === "YesNo" ? ["Evet", "Hayır"] : q.options;
-    return (
-      <fieldset aria-describedby={describedBy}>
-        <legend className="mb-1.5 font-semibold text-ink">
-          {q.label}
-          {optional}
-        </legend>
-        <div className={`flex gap-2 ${q.type === "YesNo" ? "" : "flex-wrap"}`}>
-          {options.map((o) => (
-            <label
-              key={o}
-              className="flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2.5 ring-1 ring-line transition has-checked:bg-sage-soft has-checked:ring-2 has-checked:ring-moss"
-            >
-              <input type="radio" name={name} value={o} defaultChecked={value === o} required={q.required} className="accent-forest" />
-              <span className="text-[0.95rem] font-semibold text-ink">{o}</span>
-            </label>
-          ))}
-        </div>
-        {hint}
-        {err}
-      </fieldset>
-    );
-  }
-
-  if (q.type === "Select") {
-    return (
-      <div>
-        <label htmlFor={id} className="mb-1.5 block font-semibold text-ink">
-          {q.label}
-          {optional}
-        </label>
-        <select
-          id={id}
-          name={name}
-          defaultValue={value ?? ""}
-          required={q.required}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={describedBy}
-          className="field"
-        >
-          <option value="">Seçin…</option>
-          {q.options.map((o) => (
-            <option key={o} value={o}>
-              {o}
-            </option>
-          ))}
-        </select>
-        {hint}
-        {err}
-      </div>
-    );
-  }
-
-  if (q.type === "Date") {
-    return <DateField name={name} label={q.label} defaultValue={value} required={q.required} error={error} hint={q.hint || undefined} years={eventYears()} />;
-  }
-
-  const type = q.type === "Number" ? "number" : "text";
-  return (
-    <Field
-      name={name}
-      label={q.label}
-      defaultValue={value}
-      required={q.required}
-      textarea={q.type === "Textarea"}
-      type={q.type === "Textarea" ? undefined : type}
-      inputMode={q.type === "Number" ? "decimal" : undefined}
-      maxLength={q.type === "Textarea" ? 2000 : 500}
-      hint={q.hint || undefined}
-      error={error}
-    />
-  );
-}
-
 /**
  * Pre-registration of one family, built from the program's form definition (panel → "Ön kayıt formu").
  * Camps with a price table first ask for the package; choosing it opens as many child fields as it includes.
@@ -173,6 +57,12 @@ export function EnrollmentForm({
   const maxChildren = config.allowSiblings ? MAX_CHILDREN : 1;
   const [count, setCount] = useState(() => Math.min(maxChildren, Math.max(1, Number(v.childCount) || 1)));
   const [selected, setSelected] = useState(v.priceOption ?? "");
+  // Family answers, for per-child questions shown only on a family answer.
+  const [familyValues, setFamilyValues] = useState<AnswerValues>(() =>
+    Object.fromEntries(
+      config.questions.filter((q) => !q.perChild && v[`q.${q.id}`]).map((q) => [q.id, conditionValue(q, v[`q.${q.id}`])]),
+    ),
+  );
 
   if (state.status === "success") return <FormMessage state={state} />;
 
@@ -275,11 +165,7 @@ export function EnrollmentForm({
                       years={birthYears()}
                     />
                   )}
-                  {childQuestions.map((q) => (
-                    <div key={q.id} className={wide(q) ? "sm:col-span-full" : undefined}>
-                      <Question q={q} name={`q.${q.id}.${i}`} value={v[`q.${q.id}.${i}`]} error={e[`q.${q.id}.${i}`]} />
-                    </div>
-                  ))}
+                  <QuestionGroup questions={childQuestions} name={(q) => `q.${q.id}.${i}`} initial={v} errors={e} context={familyValues} />
                 </div>
               </div>
             ))}
@@ -327,11 +213,7 @@ export function EnrollmentForm({
                 error={e.parentEmail}
               />
             )}
-            {familyQuestions.map((q) => (
-              <div key={q.id} className={wide(q) ? "sm:col-span-full" : undefined}>
-                <Question q={q} name={`q.${q.id}`} value={v[`q.${q.id}`]} error={e[`q.${q.id}`]} />
-              </div>
-            ))}
+            <QuestionGroup questions={familyQuestions} name={(q) => `q.${q.id}`} initial={v} errors={e} onChange={setFamilyValues} />
             {shown(config.note) && (
               <Field
                 name="note"
@@ -367,9 +249,6 @@ export function EnrollmentForm({
     </form>
   );
 }
-
-/** Questions that read better across the whole row. */
-const wide = (q: FormQuestion) => q.type === "Textarea" || q.type === "Checkbox" || q.type === "Radio";
 
 /** One horizontal form row: numbered title on the left, fields on the right (stacked on small screens). */
 function FormRow({ n, of, id, title, text, children }: { n: number; of: number; id: string; title: string; text: string; children: React.ReactNode }) {

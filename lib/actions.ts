@@ -1,6 +1,6 @@
 "use server";
 
-import { createEnrollment, sendContactMessage, type PostResult } from "./api";
+import { createEnrollment, markRegistrationOpened, sendContactMessage, submitRegistrationAnswers, type PostResult } from "./api";
 import type { FormState } from "./types";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -14,6 +14,20 @@ function field(form: FormData, name: string): string {
 /** Honeypot: bots fill the hidden "website" field. Pretend success. */
 function isBot(form: FormData): boolean {
   return field(form, "website") !== "";
+}
+
+/**
+ * Form fields as strings. A name sent several times (ticked options of a multiple-choice question) becomes one value,
+ * one option per line. The visual radio groups of choice questions (`…__choice`) are not answers.
+ */
+function formValues(form: FormData): Record<string, string> {
+  const data: Record<string, string> = {};
+  for (const key of new Set(form.keys())) {
+    if (key === "website" || key.endsWith("__choice") || key.startsWith("$ACTION")) continue;
+    const values = form.getAll(key).filter((v): v is string => typeof v === "string").map((v) => v.trim());
+    data[key] = values.filter((v, i) => v !== "" || i === 0).join("\n");
+  }
+  return data;
 }
 
 function invalid(errors: Record<string, string>, values: Record<string, string>): FormState {
@@ -54,8 +68,7 @@ export async function submitEnrollment(_prev: FormState, form: FormData): Promis
   //   q.{questionId}.{childIndex}       per-child question
   // Which fields are required is decided by the API from the same definition.
   const childCount = Math.min(6, Math.max(1, Number(field(form, "childCount")) || 1));
-  const data: Record<string, string> = { childCount: String(childCount) };
-  for (const [key, value] of form.entries()) if (typeof value === "string" && key !== "website") data[key] = value.trim();
+  const data: Record<string, string> = { ...formValues(form), childCount: String(childCount) };
 
   const familyAnswers: Record<string, string> = {};
   const childAnswers: Record<string, string>[] = Array.from({ length: childCount }, () => ({}));
@@ -110,6 +123,38 @@ export async function submitEnrollment(_prev: FormState, form: FormData): Promis
     );
   }
   return result;
+}
+
+/** Registration form ("esas kayıt") from a parent's personal link. Field names: `token`, `q.{questionId}`. */
+export async function submitRegistration(_prev: FormState, form: FormData): Promise<FormState> {
+  const success = "Kayıt formunuz bize ulaştı. Teşekkür ederiz!";
+  if (isBot(form)) return { status: "success", message: success };
+
+  const data = formValues(form);
+  const token = data.token ?? "";
+  const answers: Record<string, string> = {};
+  for (const [key, value] of Object.entries(data)) {
+    const m = /^q\.([A-Za-z0-9_-]+)$/.exec(key);
+    if (m) answers[m[1]] = value;
+  }
+  const result = await submitRegistrationAnswers(token, answers);
+  if (!result.ok && result.status === 409) {
+    return { status: "error", message: "Bu form artık doldurulamıyor (daha önce gönderilmiş ya da süresi dolmuş). Lütfen bizimle iletişime geçin.", values: data };
+  }
+  if (!result.ok && result.status === 404) {
+    return { status: "error", message: "Bu link geçersiz. Lütfen size gönderilen linki kontrol edin.", values: data };
+  }
+  const state = fromResult(result, success, data);
+  // API error keys (answers.{id}) → form field names (q.{id}).
+  if (state.errors) {
+    state.errors = Object.fromEntries(Object.entries(state.errors).map(([key, message]) => [key.replace(/^answers\.(.+)$/, "q.$1"), message]));
+  }
+  return state;
+}
+
+/** Records that the parent opened the form (a link preview never runs this). */
+export async function registrationOpened(token: string): Promise<void> {
+  if (/^[A-Za-z0-9_-]{32}$/.test(token)) await markRegistrationOpened(token);
 }
 
 export async function submitContact(_prev: FormState, form: FormData): Promise<FormState> {

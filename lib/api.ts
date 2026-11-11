@@ -6,6 +6,7 @@ import type {
   PageListItem,
   Preview,
   ProgramDetail,
+  PublicRegistration,
   ProgramSummary,
   ProgramType,
   SiteSettings,
@@ -78,6 +79,21 @@ export async function getPreview(token: string): Promise<Preview | null> {
   if (!res.ok) throw new Error(`GET /previews → ${res.status}`);
   const preview = (await res.json()) as Preview;
   return { ...preview, site: { ...fallbackSite, ...preview.site } };
+}
+
+/**
+ * Registration form behind a parent's personal link (never cached). Null when the link is unknown;
+ * throws when the API is unreachable.
+ */
+export async function getRegistration(token: string): Promise<PublicRegistration | null> {
+  const res = await fetch(`${API_URL}/api/public/registrations/${encodeURIComponent(token)}`, {
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`GET /registrations → ${res.status}`);
+  return (await res.json()) as PublicRegistration;
 }
 
 /** Published pages (sitemap, static params). */
@@ -177,3 +193,7 @@ async function post(path: string, body: unknown): Promise<PostResult> {
 
 export const createEnrollment = (data: EnrollmentRequest) => post("/enrollments", data);
 export const sendContactMessage = (data: ContactRequest) => post("/contact", data);
+export const submitRegistrationAnswers = (token: string, answers: Record<string, string>) =>
+  post(`/registrations/${encodeURIComponent(token)}`, { answers });
+/** Marks the link opened (called from the browser page, so link previews do not count). */
+export const markRegistrationOpened = (token: string) => post(`/registrations/${encodeURIComponent(token)}/opened`, {});

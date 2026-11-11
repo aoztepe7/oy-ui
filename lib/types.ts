@@ -172,7 +172,20 @@ export interface ProgramSummary {
 }
 
 export type FieldMode = "Hidden" | "Optional" | "Required";
-export type QuestionType = "Text" | "Textarea" | "Select" | "Radio" | "Checkbox" | "Date" | "Number" | "YesNo";
+/** `Section` is not a question: a heading (label) with an optional text (hint). */
+export type QuestionType =
+  | "Text"
+  | "Textarea"
+  | "Select"
+  | "Radio"
+  | "MultiSelect"
+  | "Checkbox"
+  | "Date"
+  | "Number"
+  | "YesNo"
+  | "Section";
+
+export type TextFormat = "Any" | "Digits" | "Phone" | "Email" | "NationalId";
 
 export interface FormQuestion {
   id: string;
@@ -181,6 +194,24 @@ export interface FormQuestion {
   required: boolean;
   /** Asked once per child instead of once per family. */
   perChild: boolean;
+  /** Choice questions: extra "Diğer" option with a free text, answered as "Diğer: …". */
+  allowOther?: boolean;
+  /** MultiSelect: how many options may be ticked. */
+  minChoices?: number | null;
+  maxChoices?: number | null;
+  /** Text only. */
+  format?: TextFormat;
+  maxLength?: number | null;
+  /** Number range, whole numbers only, unit ("cm"). */
+  min?: number | null;
+  max?: number | null;
+  integer?: boolean;
+  unit?: string;
+  /** Date range (yyyy-mm-dd). */
+  minDate?: string | null;
+  maxDate?: string | null;
+  /** Shown only when the earlier question `questionId` is answered with one of `values`. */
+  showIf?: { questionId: string; values: string[] } | null;
   options: string[];
   hint: string;
 }
@@ -240,6 +271,21 @@ export interface EnrollmentRequest {
   priceOption: string | null;
   /** Family-level custom question answers: question id → value. */
   answers: Record<string, string>;
+}
+
+export type RegistrationStatus = "Sent" | "Opened" | "Submitted" | "Expired";
+
+/** Registration form behind a parent's personal link (/kayit/{token}); questions only while it is open. */
+export interface PublicRegistration {
+  status: RegistrationStatus;
+  childName: string;
+  programTitle: string;
+  intro: string;
+  questions: FormQuestion[];
+  /** Earlier answers by question id (a renewed link). */
+  values: Record<string, string>;
+  expiresAt: string;
+  submittedAt: string | null;
 }
 
 export interface ContactRequest {
