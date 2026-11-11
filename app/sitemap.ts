@@ -18,5 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority: 0.8,
     })),
+    { url: `${SITE_URL}/gizlilik`, changeFrequency: "yearly" as const, priority: 0.2 },
+    { url: `${SITE_URL}/hesap-silme`, changeFrequency: "yearly" as const, priority: 0.1 },
   ];
 }

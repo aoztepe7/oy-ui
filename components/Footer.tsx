@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { isExternal } from "@/lib/links";
 import { cx, paddingClasses, resolveStyle } from "@/lib/style";
 import type { SiteSettings } from "@/lib/types";
@@ -105,7 +106,15 @@ export function Footer({ site, preview = false }: { site: SiteSettings; preview?
         <span>
           © {new Date().getFullYear()} {site.siteName}
         </span>
-        <span>Çocukluk dört duvara sığmaz.</span>
+        <span className="flex flex-wrap gap-x-5 gap-y-1">
+          <Link href="/gizlilik" className="hover:text-accent">
+            Gizlilik ve KVKK
+          </Link>
+          <Link href="/hesap-silme" className="hover:text-accent">
+            Hesap silme
+          </Link>
+          <span>Çocukluk dört duvara sığmaz.</span>
+        </span>
       </div>
     </footer>
   );

@@ -178,3 +178,47 @@ export async function submitContact(_prev: FormState, form: FormData): Promise<F
 
   return fromResult(await sendContactMessage(data), success, data);
 }
+
+/**
+ * Account deletion request (/hesap-silme, linked from the app stores). Sent as a contact message with a clear subject,
+ * so it lands in the panel's Messages and notifies the staff.
+ */
+export async function submitDeletionRequest(_prev: FormState, form: FormData): Promise<FormState> {
+  const success =
+    "Talebiniz bize ulaştı. Hesabınızın size ait olduğunu doğruladıktan sonra en geç 30 gün içinde silip size bilgi vereceğiz.";
+  if (isBot(form)) return { status: "success", message: success };
+
+  const data = {
+    name: field(form, "name"),
+    email: field(form, "email"),
+    phone: field(form, "phone"),
+    scope: field(form, "scope"),
+    note: field(form, "note"),
+  };
+
+  const errors: Record<string, string> = {};
+  if (data.name.length < 2) errors.name = "Adınızı yazın.";
+  if (!EMAIL_RE.test(data.email)) errors.email = "Uygulamaya giriş yaptığınız e-posta adresini yazın.";
+  if (data.phone && !PHONE_RE.test(data.phone)) errors.phone = "Geçerli bir telefon numarası yazın.";
+  if (data.note.length > 1500) errors.note = "Notunuz en fazla 1500 karakter olabilir.";
+  if (Object.keys(errors).length) return invalid(errors, data);
+
+  const scope =
+    data.scope === "all"
+      ? "Hesabım ve bana / çocuğuma ait tüm kişisel veriler silinsin (yasal saklama zorunluluğu olanlar hariç)."
+      : "Yalnızca uygulama hesabım silinsin.";
+  const message = [
+    "[HESAP SİLME TALEBİ]",
+    `Hesap e-postası: ${data.email}`,
+    `Kapsam: ${scope}`,
+    data.note && `Not: ${data.note}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  return fromResult(
+    await sendContactMessage({ name: data.name, email: data.email, phone: data.phone, message }),
+    success,
+    data,
+  );
+}
