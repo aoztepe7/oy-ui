@@ -16,8 +16,10 @@ ENV SITE_URL=$SITE_URL
 ENV NEXT_PUBLIC_MEDIA_HOST=$NEXT_PUBLIC_MEDIA_HOST
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# The API is not reachable here; pages are prerendered with fallback content
-# and refresh from the API at runtime.
+# Pages are prerendered from the live API, so a fresh deploy serves real content from the first request (the site
+# has no placeholder content). The build fails if the API cannot be reached: deploy oy-api first / retry.
+ARG API_URL=https://service.okulumyeryuzu.com
+ENV API_URL=$API_URL
 RUN npm run build
 
 FROM node:24-alpine AS runner

@@ -13,8 +13,11 @@ npm run build && npm start   # production
 npm run lint
 ```
 
-API (oy-service) çalışmıyorsa site yine açılır: tüm veri istekleri hata verdiğinde
-`lib/fallback.ts` içindeki örnek içerik kullanılır. `npm run build` API olmadan da başarılı olur.
+Sitede örnek (fallback) içerik **yoktur**; her zaman API'deki gerçek içerik gösterilir. Sayfalar ISR ile önbelleğe
+alınır (1 saat, panelden yayınlanınca anında yenilenir). API yavaşlarsa ya da çökerse Next son başarılı sayfayı
+göstermeye devam eder; yalnızca hiç başarıyla oluşturulmamış bir sayfa "Sayfa şu an yüklenemedi" ekranını gösterir.
+`npm run build` sayfaları canlı API'den üretir, bu yüzden build sırasında API erişilebilir olmalıdır
+(Docker build'de `API_URL` build argümanı, varsayılan `https://service.okulumyeryuzu.com`).
 
 ## Ortam değişkenleri
 
@@ -75,5 +78,5 @@ Sözleşme: `../docs/VISUAL_EDITOR.md`.
 
 - `app/` — `(site)/` altında genel sayfalar (header/footer bu grubun layout'unda), `onizleme/` düzenleyici önizlemesi, `sitemap.ts`, `robots.ts`, `api/revalidate`
 - `components/` — küçük arayüz bileşenleri (istemci bileşenleri: `MobileNav`, `NavLinks`, formlar, program filtre/slider, `PreviewBridge`)
-- `lib/` — `api.ts` (veri), `fallback.ts` (örnek içerik), `types.ts` (sözleşme tipleri), `format.ts` (tr-TR biçimlendirme), `actions.ts` (Server Actions), `style.ts` (blok stilleri), `edit.ts` (önizleme düzenleme öznitelikleri), `panel.ts` (`PANEL_ORIGINS`)
+- `lib/` — `api.ts` (veri), `types.ts` (sözleşme tipleri), `format.ts` (tr-TR biçimlendirme), `actions.ts` (Server Actions), `style.ts` (blok stilleri), `edit.ts` (önizleme düzenleme öznitelikleri), `panel.ts` (`PANEL_ORIGINS`)
 - Renk ve yazı tipi token'ları: `app/globals.css` içindeki `@theme`
