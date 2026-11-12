@@ -6,6 +6,9 @@ function mediaPatterns(): RemotePattern[] {
   const hosts = [
     "http://localhost:8080",
     "https://service.okulumyeryuzu.com",
+    // DigitalOcean Spaces (API Storage:Spaces): the CDN and the bucket's origin endpoint.
+    "https://okulumyeryuzu.fra1.cdn.digitaloceanspaces.com",
+    "https://okulumyeryuzu.fra1.digitaloceanspaces.com",
     ...(process.env.NEXT_PUBLIC_MEDIA_HOST ?? "").split(","),
   ];
   const patterns = new Map<string, RemotePattern>();
