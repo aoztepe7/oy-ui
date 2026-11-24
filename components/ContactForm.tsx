@@ -1,13 +1,18 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { submitContact } from "@/lib/actions";
+import { trackPixel } from "@/lib/pixel";
 import { Field, FormMessage, Honeypot, initialFormState } from "./FormParts";
 
 export function ContactForm() {
   const [state, action, pending] = useActionState(submitContact, initialFormState);
   const e = state.errors ?? {};
   const v = state.values ?? {};
+
+  useEffect(() => {
+    if (state.status === "success") trackPixel("Contact");
+  }, [state]);
 
   if (state.status === "success") return <FormMessage state={state} />;
 

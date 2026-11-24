@@ -80,3 +80,13 @@ Sözleşme: `../docs/VISUAL_EDITOR.md`.
 - `components/` — küçük arayüz bileşenleri (istemci bileşenleri: `MobileNav`, `NavLinks`, formlar, program filtre/slider, `PreviewBridge`)
 - `lib/` — `api.ts` (veri), `types.ts` (sözleşme tipleri), `format.ts` (tr-TR biçimlendirme), `actions.ts` (Server Actions), `style.ts` (blok stilleri), `edit.ts` (önizleme düzenleme öznitelikleri), `panel.ts` (`PANEL_ORIGINS`)
 - Renk ve yazı tipi token'ları: `app/globals.css` içindeki `@theme`
+
+## Reklam takibi (Meta Pixel)
+
+- Pixel ID panelden (Entegrasyonlar → Reklam takibi) girilir; site `GET /api/public/tracking` ile alır (`site` etiketiyle önbelleklenir).
+  Boşsa hiçbir şey yüklenmez ve gizlilik metni "takip aracı kullanmayız" der.
+- Pixel yalnızca çerez bandında "Kabul et" denirse yüklenir. Karar `localStorage["oy-cookie-consent"]` içinde (`granted` / `denied`) tutulur;
+  gizlilik sayfasındaki "Çerez tercihlerimi değiştir" düğmesi kararı sıfırlar.
+- Gönderilen olaylar: `PageView` (her sayfa geçişinde), `Lead` (ön kayıt), `Contact` (iletişim formu), `CompleteRegistration` (kayıt formu).
+  Olaylara kişisel veri eklenmez (ön kayıtta yalnızca program adı).
+- Yeni ortam değişkeni yoktur. `/onizleme` sayfaları Pixel yüklemez.

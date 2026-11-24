@@ -1,10 +1,11 @@
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
-import { getSite } from "@/lib/api";
+import { MetaPixel } from "@/components/MetaPixel";
+import { getSite, getTracking } from "@/lib/api";
 
 /** Public pages: published header and footer. (The visual editor preview renders its own.) */
 export default async function SiteLayout({ children }: LayoutProps<"/">) {
-  const site = await getSite();
+  const [site, tracking] = await Promise.all([getSite(), getTracking()]);
   return (
     <>
       <Header site={site} />
@@ -12,6 +13,7 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
         {children}
       </main>
       <Footer site={site} />
+      {tracking.metaPixelId && <MetaPixel pixelId={tracking.metaPixelId} />}
     </>
   );
 }

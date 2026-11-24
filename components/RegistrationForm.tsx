@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect } from "react";
 import { registrationOpened, submitRegistration } from "@/lib/actions";
+import { trackPixel } from "@/lib/pixel";
 import type { FormQuestion } from "@/lib/types";
 import { QuestionGroup } from "./FormQuestions";
 import { FormMessage, Honeypot, initialFormState } from "./FormParts";
@@ -28,6 +29,10 @@ export function RegistrationForm({
   useEffect(() => {
     registrationOpened(token).catch(() => undefined);
   }, [token]);
+
+  useEffect(() => {
+    if (state.status === "success") trackPixel("CompleteRegistration");
+  }, [state]);
 
   if (state.status === "success") {
     return (

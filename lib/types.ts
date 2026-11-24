@@ -9,6 +9,12 @@ export interface NavItem {
   href: string;
 }
 
+/** `GET /api/public/tracking` — ad tracking settings from the panel (empty strings = off). */
+export interface Tracking {
+  metaPixelId: string;
+  metaDomainVerification: string;
+}
+
 /** `GET /api/public/site` — menus and contact details shared by every page. */
 export interface SiteSettings {
   siteName: string;

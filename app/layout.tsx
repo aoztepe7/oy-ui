@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Nunito_Sans } from "next/font/google";
-import { getSite } from "@/lib/api";
+import { getSite, getTracking } from "@/lib/api";
 import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
@@ -18,7 +18,7 @@ const nunito = Nunito_Sans({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const site = await getSite();
+  const [site, tracking] = await Promise.all([getSite(), getTracking()]);
   return {
     metadataBase: new URL(SITE_URL),
     title: { default: `${site.siteName} — ${site.tagline}`, template: `%s | ${site.siteName}` },
@@ -26,6 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
     applicationName: site.siteName,
     openGraph: { type: "website", locale: "tr_TR", siteName: site.siteName },
     twitter: { card: "summary_large_image" },
+    ...(tracking.metaDomainVerification && { other: { "facebook-domain-verification": tracking.metaDomainVerification } }),
   };
 }
 
