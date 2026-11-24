@@ -133,8 +133,18 @@ export async function getThemes(): Promise<Theme[]> {
   return get<Theme[]>("/themes", ["themes"]);
 }
 
+/** Display order of the team by first name; anyone not listed follows, in the order the API returned. */
+const TEAM_ORDER = ["pelin", "selin", "süleyman", "esra", "fatma"];
+
+function teamRank(member: TeamMember): number {
+  const first = member.fullName.trim().split(/\s+/)[0]?.toLocaleLowerCase("tr-TR") ?? "";
+  const rank = TEAM_ORDER.indexOf(first);
+  return rank === -1 ? TEAM_ORDER.length : rank;
+}
+
 export async function getTeam(): Promise<TeamMember[]> {
-  return get<TeamMember[]>("/team", ["team"]);
+  const team = await get<TeamMember[]>("/team", ["team"]);
+  return [...team].sort((a, b) => teamRank(a) - teamRank(b));
 }
 
 export type PostResult =
