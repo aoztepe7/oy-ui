@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getSite } from "@/lib/api";
+import { getSite, getTracking } from "@/lib/api";
+import { CookiePreferencesButton } from "@/components/CookiePreferencesButton";
 import { LegalSection as Section, LegalShell } from "@/components/Legal";
 import { LEGAL } from "@/lib/legal";
 
@@ -12,7 +13,8 @@ export const metadata: Metadata = {
 
 /** Privacy policy + KVKK disclosure (aydınlatma metni) for the website and the iOS / Android app. Linked from the stores. */
 export default async function PrivacyPage() {
-  const site = await getSite();
+  const [site, tracking] = await Promise.all([getSite(), getTracking()]);
+  const pixel = tracking.metaPixelId !== "";
   const contact = [site.email && `e-posta: ${site.email}`, site.phone && `telefon: ${site.phone}`, site.address && `adres: ${site.address}`]
     .filter(Boolean)
     .join(" · ");
@@ -109,7 +111,18 @@ export default async function PrivacyPage() {
             Uygulamaya güvenli giriş sağlamak ve yetkisiz erişimi önlemek: <em>meşru menfaat</em> ve <em>veri güvenliği yükümlülüğü</em>.
           </li>
         </ul>
-        <p>Reklam yapmayız, verilerinizi satmayız ve reklam ya da izleme amaçlı çerez veya takip aracı kullanmayız.</p>
+        {pixel ? (
+          <p>
+            Verilerinizi satmayız. Web sitemizde, <strong>yalnızca çerez bandında onay vermeniz halinde</strong>, Instagram ve Facebook
+            reklamlarımızın etkisini ölçmek amacıyla Meta Platforms Ireland Ltd.&apos;nin <em>Meta Pixel</em> aracını kullanırız. Bu araç
+            ziyaret ettiğiniz sayfaları, ön kayıt veya iletişim formunu gönderdiğiniz bilgisini (form içeriği hariç) ve tarayıcı/cihaz
+            bilgilerinizi Meta&apos;ya iletir. Hukuki sebep ve yurt dışına aktarım dayanağı açık rızanızdır (KVKK m.5/1, m.9). Ad, telefon,
+            çocuğunuza ait bilgiler veya sağlık bilgileri Meta ile paylaşılmaz. Onayınızı istediğiniz an geri alabilirsiniz:{" "}
+            <CookiePreferencesButton />
+          </p>
+        ) : (
+          <p>Reklam yapmayız, verilerinizi satmayız ve reklam ya da izleme amaçlı çerez veya takip aracı kullanmayız.</p>
+        )}
       </Section>
 
       <Section title="5. Verileri kimlerle paylaşıyoruz?">
@@ -121,6 +134,11 @@ export default async function PrivacyPage() {
             yalnızca bizim adımıza ve talimatlarımızla işler. Bazı sağlayıcıların sunucuları yurt dışında bulunabilir; bu durumda aktarım
             KVKK m.9&apos;daki güvencelere uygun olarak yapılır.
           </li>
+          {pixel && (
+            <li>
+              <strong>Meta Platforms Ireland Ltd.:</strong> yalnızca çerez onayı verdiyseniz, reklam ölçümü için.
+            </li>
+          )}
           <li>
             <strong>Kamu kurumları:</strong> Gelir İdaresi Başkanlığı gibi kurumlar ve yetkili mercilere, kanunen zorunlu olduğu ölçüde.
           </li>

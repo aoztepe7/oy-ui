@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { submitEnrollment } from "@/lib/actions";
+import { trackPixel } from "@/lib/pixel";
 import type { EnrollmentFormConfig, FieldMode } from "@/lib/types";
 import { birthYears, DateField } from "./DateField";
 import { conditionValue, QuestionGroup, type AnswerValues } from "./FormQuestions";
@@ -63,6 +64,11 @@ export function EnrollmentForm({
       config.questions.filter((q) => !q.perChild && v[`q.${q.id}`]).map((q) => [q.id, conditionValue(q, v[`q.${q.id}`])]),
     ),
   );
+
+  // Only the program name goes to Meta, never anything about the family or the children.
+  useEffect(() => {
+    if (state.status === "success") trackPixel("Lead", { content_name: programTitle });
+  }, [state, programTitle]);
 
   if (state.status === "success") return <FormMessage state={state} />;
 

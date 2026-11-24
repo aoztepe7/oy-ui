@@ -11,6 +11,7 @@ import type {
   SiteSettings,
   TeamMember,
   Theme,
+  Tracking,
 } from "./types";
 
 const API_URL = (process.env.API_URL || "http://localhost:8080").replace(/\/$/, "");
@@ -97,6 +98,18 @@ export async function getRegistration(token: string): Promise<PublicRegistration
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`GET /registrations → ${res.status}`);
   return (await res.json()) as PublicRegistration;
+}
+
+const noTracking: Tracking = { metaPixelId: "", metaDomainVerification: "" };
+
+/** Ad tracking settings (panel → Entegrasyonlar). An older API without the endpoint (404) means "off". */
+export async function getTracking(): Promise<Tracking> {
+  try {
+    return { ...noTracking, ...(await get<Partial<Tracking>>("/tracking", ["site"])) };
+  } catch (error) {
+    if (error instanceof NotFoundError) return noTracking;
+    throw error;
+  }
 }
 
 /** Published pages (sitemap, static params). */
